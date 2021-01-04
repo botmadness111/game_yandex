@@ -5,6 +5,7 @@ CELL_SIZE = 50
 PLAYING_WINDOW_SIZE = 800, 800
 WINDOW_SIZE = 600, 600
 BTN_SIZE = 25, 25
+COUNTRY_COORDS = [5, 20]
 
 
 class Board:
@@ -19,6 +20,7 @@ class Board:
         self.left = 15
         self.top = 15
         self.otstup = 5
+        self.country_coords = COUNTRY_COORDS
 
     def render(self, screen):
         # button to main_menu
@@ -75,3 +77,10 @@ class Board:
 
                 screen.fill((0, 0, 0))
                 main_menu.render(screen, event)
+                
+    def get_distance_vector(self, cell_click):
+        try:
+            S = (abs(self.country_coords[0] - cell_click[0]) + abs(self.country_coords[1] - cell_click[1])) ** 0.5
+        except TypeError:
+            S = 'вы нажали НЕ на клетку'
+        return S
