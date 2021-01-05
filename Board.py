@@ -5,6 +5,8 @@ CELL_SIZE = 50
 PLAYING_WINDOW_SIZE = 800, 800
 WINDOW_SIZE = 600, 600
 BTN_SIZE = 25, 25
+CELL_COUNTRY = (5, 20)  # ячейка деревни
+PUT_DO_IMAGES = 'images'
 
 
 class Board:
