@@ -1,4 +1,5 @@
 import pygame
+
 from Main import load_image
 import MainMenu
 from Main import text_format
@@ -24,13 +25,13 @@ class Board:
         self.top = 15
         self.otstup = 5
         self.cell_country = CELL_COUNTRY
-        self.food = 10
+        self.food = 100
         self.f = "  " + str(self.food)
         self.people = 10
         self.p = "  " + str(self.people)
-        self.stone = 10
+        self.stone = 100
         self.s = "  " + str(self.stone)
-        self.wood = 10
+        self.wood = 100
         self.w = "  " + str(self.wood)
         self.width = len(self.board[0])
         self.height = len(self.board)
@@ -45,8 +46,24 @@ class Board:
         self.forest = pygame.transform.scale(self.forest, (50, 50))
         self.mount = load_image("mount.png")
         self.mount = pygame.transform.scale(self.mount, (50, 50))
-        self.text = text_format("Деревня  " + self.f + self.p + self.s + self.w, 15, (255, 255, 255))
+        self.text = text_format("Деревня  " + self.f + self.p + self.s + self.w, 40, (255, 255, 255))
         self.activ_cell = text_format("", 45, (255, 255, 255))
+        self.next_image = load_image("next.jpg")
+        self.next_image = pygame.transform.scale(self.next_image, (70, 50))
+        self.all_clicks = []
+        self.check_reverse_list = 1
+        self.day = 1
+
+        # создадим группу, содержащую спрайт кнопки next
+        self.all_sprites_next = pygame.sprite.Group()
+        # добавляем спрайты
+        sprite = pygame.sprite.Sprite()
+        sprite.image = self.next_image
+        sprite.rect = sprite.image.get_rect()
+        sprite.rect.x = 600
+        sprite.rect.y = 600
+        self.sprite_next_rect = sprite.rect
+        self.all_sprites_next.add(sprite)
 
     def render(self, screen):
         # button to main_menu
@@ -54,7 +71,7 @@ class Board:
                          (PLAYING_WINDOW_SIZE[0] - BTN_SIZE[0] - self.otstup,
                           self.otstup, BTN_SIZE[0],
                           BTN_SIZE[1]))
-        pygame.draw.rect(screen, 'red', (500, 400, 100, 45))
+        pygame.draw.rect(screen, 'red', (350, 530, 50, 45))
 
         for x in range(self.width):
             for y in range(self.height):
@@ -77,12 +94,14 @@ class Board:
                     screen.blit(self.mount,
                                 (self.cell_size * x + self.left,
                                  y * self.cell_size + self.top))
-                #if cell == 4:
-                    #screen.blit(self.village,
-                                #(self.cell_size * x + self.left,
-                                 #y * self.cell_size + self.top))
-        screen.blit(self.text, (650, 0))
-        screen.blit(self.activ_cell, (600, 0))
+                # if cell == 4:
+                # screen.blit(self.village,
+                # (self.cell_size * x + self.left,
+                # y * self.cell_size + self.top))
+        # screen.blit(self.text, (60, 580))
+        screen.blit(text_format(str(self.day), 45, "white"), (620, 550))
+        self.all_sprites_next.draw(screen)
+        screen.blit(self.activ_cell, (60, 530))
         pygame.display.flip()
 
     def get_click(self, mouse_pos):
@@ -90,14 +109,35 @@ class Board:
         if self.left < mouse_pos[0] < self.width * self.cell_size + self.left and \
                 self.top < mouse_pos[1] < self.height * self.cell_size + self.top:
             cell = self.get_cell(mouse_pos)
+            self.all_clicks.append((cell, mouse_pos))
             self.on_click_cell(cell)
-            if 500 < mouse_pos[0] < 600 and 400 < mouse_pos[1] < 445:
-                self.mining(cell)# кнопка дабыть
+        # if 500 < mouse_pos[0] < 600 and 400 < mouse_pos[1] < 445:
+        # self.mining(cell)  # кнопка дабыть
         # is it quit btn?
         if PLAYING_WINDOW_SIZE[0] - BTN_SIZE[0] - self.otstup < mouse_pos[0] < PLAYING_WINDOW_SIZE[0] \
                 - self.otstup and self.otstup < mouse_pos[1] < BTN_SIZE[1] + self.otstup:
             self.btn_quit_pressed()
 
+        next_rect = self.sprite_next_rect
+        if next_rect.collidepoint(pygame.mouse.get_pos()):
+            self.day += 1
+            if self.check_reverse_list % 2 == 0:
+                self.all_clicks.reverse()
+            self.check_reverse_list += 1
+            for click in self.all_clicks:
+                if self.left < click[1][0] < self.width * self.cell_size + self.left and \
+                        self.top < click[1][1] < self.height * self.cell_size + self.top:
+                    x, y = click[0]
+                    self.cell = self.board[y][x]
+                    if self.cell == 0:
+                        pass
+                    if self.cell == 1:
+                        self.food += 10
+                    if self.cell == 2:
+                        self.stone += 10
+                    if self.cell == 3:
+                        self.wood += 10
+            self.all_clicks.clear()
 
     def get_cell(self, mouse_pos):
         # получение координаты клетки относительно всего поля
@@ -152,4 +192,3 @@ class Board:
         if self.cell == 3:
             self.wood += 2
             self.people -= 1
-
